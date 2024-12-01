@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Save User Data</title>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+    <style>
+      /* Global Styles */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+        height: 100%;
+      }
+      /* background image */
+      #back {
+        background-image: url("./hostel.jpg");
+        background-size: cover;
+        height: 100%;
+        filter: blur(5px);
+        position: absolute;
+        width: 100%;
+      }
+      /* input data */
+      #content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+
+        height: 100%;
+        padding: 20px;
+      }
+      /* input field background */
+      .form-container {
+        background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 600px;
+        width: 100%;
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+      }
+      /* hedding tag */
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #1f509a;
+        font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+      }
+      /* form input elements */
+      form {
+        display: flex;
+        flex-direction: column;
+        color: #1f509a;
+      }
+      /* labels */
+      label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-family: "Times New Roman", Times, serif;
+      }
+      /* input buttons */
+      input,
+      button {
+        margin-bottom: 15px;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #cccccc7d;
+        border-radius: 15px;
+      }
+      /* submit buttons */
+      button {
+        background-color: #b1c25e;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #1f509a;
+      }
+
+      /*  message shown like successfull*/
+      #message {
+        text-align: center;
+        font-size: 16px;
+        margin-top: 10px;
+        color: green;
+      }
+      /* hidden div pop of verification  */
+      .modal {
+        display: none;
+        position: fixed;
+
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+        padding-top: 60px;
+      }
+      /* input enter generated otp box */
+      .modal-content {
+        background-color: rgb(255, 255, 255);
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 400px;
+      }
+      /* using span to close a pop up window */
+      .close {
+        color: #c17825;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        cursor: pointer;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .form-container {
+          padding: 15px;
+        }
+
+        input,
+        button {
+          font-size: 14px;
+        }
+
+        h1 {
+          font-size: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .form-container {
+          padding: 10px;
+        }
+
+        input,
+        button {
+          font-size: 12px;
+          padding: 8px;
+        }
+
+        h1 {
+          font-size: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="back"></div>
+    <div id="content">
+      <div class="form-container">
+        <h1>
+          <ion-icon name="home-sharp"></ion-icon> Sri Veda's Luxury Men's Hostel
+        </h1>
+        <form id="userForm">
+          <label for="username">Enter Your Name:</label>
+          <input type="text" id="username" required disabled />
+
+          <label for="mobile">Enter Mobile Number:</label>
+          <input type="text" id="mobile" name="mobile" required disabled />
+
+          <label for="email">Email:</label>
+          <input type="email" id="email" required disabled />
+
+          <label for="aadhaarNumber">Enter Aadhaar Number:</label>
+          <input
+            type="text"
+            id="aadhaarNumber"
+            maxlength="12"
+            pattern="\d{12}"
+            required
+          />
+          <button type="button" id="generateOtpButton">Generate OTP</button>
+
+          <label for="fileUpload"
+            >Upload Profile Picture (JPG/JPEG only):</label
+          >
+          <input type="file" id="fileUpload" disabled />
+
+          <label for="joinDate">Select Join Date:</label>
+          <input type="date" id="joinDate" required disabled />
+
+          <button type="submit" id="saveDataButton" disabled>Save Data</button>
+        </form>
+        <p id="message"></p>
+      </div>
+    </div>
+
+    <!-- Modal for OTP verification -->
+    <div id="otpModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>OTP Verification</h2>
+        <p>OTP has been sent. Please enter it below:</p>
+        <input
+          type="text"
+          id="otpInput"
+          maxlength="6"
+          pattern="\d{6}"
+          required
+        />
+        <button type="button" id="verifyOtp">Verify OTP</button>
+      </div>
+    </div>
+    <script>
+      const userForm = document.getElementById("userForm"); //getting form
+      const usernameInput = document.getElementById("username"); //getting username
+      const mobileInput = document.getElementById("mobile"); //getting mobile
+      const emailInput = document.getElementById("email"); //getting email
+      const aadhaarNumber = document.getElementById("aadhaarNumber"); //getting adharnumber
+      const fileUploadInput = document.getElementById("fileUpload"); //getting file
+      const joinDateInput = document.getElementById("joinDate"); // getting joindate
+      const generateOtpButton = document.getElementById("generateOtpButton"); // getting generate otp
+      const saveDataButton = document.getElementById("saveDataButton"); // getting save data
+      const message = document.getElementById("message"); // getting empty tag to display message
+      const otpModal = document.getElementById("otpModal"); // getting otpmodel div
+      const closeModal = document.getElementById("closeModal"); // getting close button
+      const otpInput = document.getElementById("otpInput"); //getting generated otp to enter
+      const verifyOtpButton = document.getElementById("verifyOtp"); // getting verify button
+
+      let generatedOtp = ""; //creating a variable to assign a function generatedotp().
+      let otpVerified = false; // assign defaulf false to enter correct otp after verified.
+
+      // Utility function to display messages in document without this function the page does'nt show any message.
+      function displayMessage(text, color = "black") {
+        message.textContent = text;
+        message.style.color = color;
+      }
+
+      // logic to Generate a random OTP's
+      function generateOtp() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+      }
+
+      // Handle Aadhaar validation and clicking genarate button OTP it call's a event to otp.
+      generateOtpButton.addEventListener("click", () => {
+        const aadhaar = aadhaarNumber.value.trim();
+
+        if (/^\d{12}$/.test(aadhaar)) {
+          //check codition input exactly 12 digits return true otherwise false.
+          generatedOtp = generateOtp(); //assigning a random otp function to variable.
+          alert("Generated OTP:"+ generatedOtp); // display generated otp show in console.
+          displayMessage(
+            "OTP has been sent to your Adhar registered mobile number.",
+            "green"
+          ); // we condition true generated a otp it show a message in form.
+
+          // Open OTP modal
+          otpModal.style.display = "block"; //pop up window display in blocklevel
+        } else {
+          displayMessage(
+            "Please enter a valid 12-digit Aadhaar number.",
+            "red"
+          ); // if adhar number is not valid to display this message to recheck adhar number.
+        }
+      });
+
+      // Close the OTP modal
+      closeModal.addEventListener("click", () => {
+        otpModal.style.display = "none"; // after entered generated otp to hide a window by click .
+      });
+
+      // Handle OTP verification
+      verifyOtpButton.addEventListener("click", () => {
+        //after enter generated otp by click on verify button.
+        if (otpInput.value.trim() === generatedOtp) {
+          //by clicking it checks user enter otp & generated otp if it equals condition true  user can enter next feilds otherwise it returns message.
+          otpVerified = true;
+          displayMessage("OTP verified successfully!", "green"); // if codition false it display a message.
+
+          usernameInput.disabled = false;
+          mobileInput.disabled = false;
+          emailInput.disabled = false; // after verification this feilds are enable.
+          fileUploadInput.disabled = false;
+          joinDateInput.disabled = false;
+          saveDataButton.disabled = false;
+
+          otpModal.style.display = "none"; // after verified to close a window.
+        } else {
+          displayMessage("Incorrect OTP. Please try again.", "red"); // if verification failed then returns a message.
+        }
+      });
+
+      // Handle file upload validation
+      fileUploadInput.addEventListener("change", (event) => {
+        // user click on file upload it changes to open drive to upload .
+        const file = event.target.files[0]; //storing a data in a variable
+        if (file && /\.(jpg|jpeg)$/i.test(file.name)) {
+          // check end of file extention with jpg or jepg then accept .here using regular expressions (case insensitive)
+          displayMessage(`File "${file.name}" uploaded successfully!`, "green"); // if match with condition extentions it returns message.
+        } else {
+          displayMessage(
+            "Invalid file type. Only .jpg or .jpeg files are allowed.",
+            "red"
+          ); //otherwise it returns check extention of file.
+          fileUploadInput.value = ""; // Clear invalid file input automatically.
+        }
+      });
+
+      // Handle form submission
+      userForm.addEventListener("submit", (event) => {
+        //by click save button
+        event.preventDefault(); // to prevent default behaviour of page
+
+        if (!otpVerified) {
+          displayMessage(
+            "Please verify the OTP before submitting the form.",
+            "red"
+          );
+          return; // entire submission skip
+        }
+
+        const username = usernameInput.value.trim(); //get a name and remove any whitespace in name .
+        const mobileNumber = mobileInput.value.trim();
+        const email = emailInput.value.trim();
+        const joinDate = new Date(joinDateInput.value); //join for a manipulations use object
+        const currentDate = new Date(); //current current date
+
+        if (joinDate >= currentDate) {
+          displayMessage("Please select a past date for the join date.", "red");
+          return;
+        }
+
+        const userData = {
+          username,
+          mobile: mobileNumber,   // using a local storage  to store date temporary.
+          email,
+          joinDate: joinDate.toDateString(),
+        };
+        localStorage.setItem("userData", JSON.stringify(userData));//to store a data in method setItem to starage. 
+
+        console.log(JSON.parse(localStorage.getItem("userData"))); 
+        displayMessage(" saved successfully!", "green");// final status of data return through a message formate.
+      });
+    </script>
+
+    <!-- NOTE: without date object we compared strings is work in simple cases 
+     when complex date in the sense different time zone,different formats .
+     it won't work properly so, we use date object -->
+  </body>
+</html>
